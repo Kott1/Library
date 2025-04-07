@@ -61,6 +61,49 @@ app.get('/login', async (req, res) => {
     }
 });
 
+app.post('/books', adminMiddleware, (req, res) => {
+    const { title, author, description } = req.body;
+    if (!title || !author) {
+        return res.status(400).json({ error: 'Title and author are required' });
+    }
+    const newBook = {
+        id: nextId++,
+        title,
+        author,
+        description: description || ''
+    };
+    books.push(newBook);
+    res.status(201).json(newBook);
+});
+
+
+app.get('/books', (req, res) => {
+    res.json(books);
+});
+
+app.get('/books/:id', (req, res) => {
+    const bookId = parseInt(req.params.id, 10);
+    const book = books.find(b => b.id === bookId);
+    if (!book) {
+        return res.status(404).json({ error: 'Book not found' });
+    }
+    res.json(book);
+});
+
+app.put('/books/:id', adminMiddleware, (req, res) => {
+    const bookId = parseInt(req.params.id, 10);
+    const book = books.find(b => b.id === bookId);
+    if (!book) {
+        return res.status(404).json({ error: 'Book not found' });
+    }
+    const { title, author, description } = req.body;
+    if (title !== undefined) book.title = title;
+    if (author !== undefined) book.author = author;
+    if (description !== undefined) book.description = description;
+    
+    res.json(book);
+});
+
 const PORT = 3002;
 app.listen(PORT, () => {
     console.log(`Gateway server running on port ${PORT}`);
