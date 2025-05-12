@@ -61,47 +61,77 @@ app.get('/login', async (req, res) => {
     }
 });
 
-app.post('/books', adminMiddleware, (req, res) => {
-    const { title, author, description } = req.body;
-    if (!title || !author) {
-        return res.status(400).json({ error: 'Title and author are required' });
+// Books requests
+
+app.post('/books', async (req, res) => {
+    try {
+        const response = await fetch('http://localhost:3003/books', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body),
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        console.error('Gateway error (POST /books):', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-    const newBook = {
-        id: nextId++,
-        title,
-        author,
-        description: description || ''
-    };
-    books.push(newBook);
-    res.status(201).json(newBook);
+});
+  
+app.get('/books', async (req, res) => {
+    try {
+        const response = await fetch('http://localhost:3003/books');
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        console.error('Gateway error (GET /books):', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
+app.get('/books/:id', async (req, res) => {
+    const { id } = req.params;
 
-app.get('/books', (req, res) => {
-    res.json(books);
+    try {
+        const response = await fetch(`http://localhost:3003/books/${id}`);
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        console.error(`Gateway error (GET /books/${id}):`, error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
-app.get('/books/:id', (req, res) => {
-    const bookId = parseInt(req.params.id, 10);
-    const book = books.find(b => b.id === bookId);
-    if (!book) {
-        return res.status(404).json({ error: 'Book not found' });
-    }
-    res.json(book);
-});
+app.put('/books/:id', async (req, res) => {
+    const { id } = req.params;
 
-app.put('/books/:id', adminMiddleware, (req, res) => {
-    const bookId = parseInt(req.params.id, 10);
-    const book = books.find(b => b.id === bookId);
-    if (!book) {
-        return res.status(404).json({ error: 'Book not found' });
+    try {
+        const response = await fetch(`http://localhost:3003/books/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body),
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        console.error(`Gateway error (PUT /books/${id}):`, error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-    const { title, author, description } = req.body;
-    if (title !== undefined) book.title = title;
-    if (author !== undefined) book.author = author;
-    if (description !== undefined) book.description = description;
-    
-    res.json(book);
+});
+  
+app.delete('/books/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const response = await fetch(`http://localhost:3003/books/${id}`, {
+            method: 'DELETE',
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        console.error(`Gateway error (DELETE /books/${id}):`, error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
 const PORT = 3002;
