@@ -61,6 +61,79 @@ app.post('/login', async (req, res) => {
     }
 });
 
+// Books requests
+
+app.post('/books', async (req, res) => {
+    try {
+        const response = await fetch('http://localhost:3003/books', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body),
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        console.error('Gateway error (POST /books):', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+  
+app.get('/books', async (req, res) => {
+    try {
+        const response = await fetch('http://localhost:3003/books');
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        console.error('Gateway error (GET /books):', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.get('/books/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const response = await fetch(`http://localhost:3003/books/${id}`);
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        console.error(`Gateway error (GET /books/${id}):`, error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+app.put('/books/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const response = await fetch(`http://localhost:3003/books/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(req.body),
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        console.error(`Gateway error (PUT /books/${id}):`, error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+  
+app.delete('/books/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const response = await fetch(`http://localhost:3003/books/${id}`, {
+            method: 'DELETE',
+        });
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (error) {
+        console.error(`Gateway error (DELETE /books/${id}):`, error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 const PORT = 3002;
 app.listen(PORT, () => {
     console.log(`Gateway server running on port ${PORT}`);
