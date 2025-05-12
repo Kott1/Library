@@ -29,7 +29,7 @@ app.post('/register', async (req, res) => {
         });
 
         const data = await response.json();
-        res.status(201).json(data);
+        res.status(response.status).json(data);
     } catch (error) {
         console.error('Error in gateway:', error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -39,6 +39,7 @@ app.post('/register', async (req, res) => {
 app.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
+        console.log(email, password);
         if (!email || !password) {
             return res.status(400).json({ error: 'Name, email and password are required' });
         }
@@ -54,7 +55,7 @@ app.post('/login', async (req, res) => {
         });
 
         const data = await response.json();
-        res.status(201).json(data);
+        res.status(response.status).json(data);
     } catch (error) {
         console.error('Error in gateway:', error);
         res.status(500).json({ error: 'Internal Server Error' });

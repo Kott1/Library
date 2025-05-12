@@ -1,28 +1,33 @@
 'use client'
 import { useState } from "react";
+import { useRouter } from 'next/navigation';
 
 export default function Login () {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const router = useRouter();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         try {
             const response = await fetch("http://localhost:3002/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
-                    email: email,
-                    password: password
+                    email,
+                    password
                 }),
             });
 
             const data = await response.json();
-            console.log(response);
-            console.log(data);
             if (response.ok && !data.error) {
-                alert(data.message);
+                const isAdmin = email === 'admin@gmail.com' && password === 'admin';
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('isAdmin', JSON.stringify(isAdmin));
+
+                alert('User signed in successfully');
+
+                router.push('/pages/home');
             } else {
                 alert(data.error);
             }
