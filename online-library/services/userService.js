@@ -25,7 +25,6 @@ app.post('/register', async (req, res) => {
     const { name, email, password } = req.body;
 
     try {
-        console.log(8)
         const checkQuery = `
             SELECT * FROM users WHERE name = $1 OR email = $2 OR password = $3;
         `;
@@ -34,7 +33,6 @@ app.post('/register', async (req, res) => {
         if (checkResult.rows.length > 0) {
             return res.status(400).json({ error: 'User with this name, email, or password already exists' });
         }
-        console.log(9)
         const createdAt = new Date();
         const id = uuidv4();
 
@@ -44,9 +42,9 @@ app.post('/register', async (req, res) => {
             RETURNING *;
         `;
         const values = [id, name, email, password, createdAt];
-        console.log(10)
+
         const result = await pool.query(query, values);
-        console.log(11)
+
         res.status(201).json(result.rows[0]);
     } catch (err) {
         console.error('Error executing query', err.stack);
