@@ -52,17 +52,18 @@ app.post('/register', async (req, res) => {
     }
 });
 
-app.get('/login', async (req, res) => {
+app.post('/login', async (req, res) => {
     const { email, password } = req.body;
-
+    console.log(email, " | ", password);
     try {
         const query = `SELECT * FROM users WHERE email = $1 AND password = $2;`;
         const result = await pool.query(query, [email, password]);
-
-        if (result.rows.length === 0) {
+        console.log(result);
+        if (result.rows.length == 0) {
+            console.log(1);
             return res.status(401).json({ error: 'Invalid email or password' });
         }
-        res.status(200).json(result.rows[0]);
+        res.status(200).json({ message: 'Login successful', user: result.rows[0] });
     } catch (err) {
         console.error('Error executing login query', err.stack);
         res.status(500).json({ error: 'Database error' });
