@@ -92,6 +92,16 @@ app.get('/books', async (req, res) => {
 
 app.get('/books/:id', async (req, res) => {
     const { id } = req.params;
+    
+    const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+    if (!id) {
+        return res.status(400).json({ error: 'Ented book id.' });
+    }
+    
+    if (!uuidV4Regex.test(id)) {
+        return res.status(400).json({ error: 'Invalid ID format. Expected UUID v4.' })
+    }
 
     try {
         const response = await fetch(`http://localhost:3003/books/${id}`);

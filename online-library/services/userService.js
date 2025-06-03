@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 
 app.use(cors({
-    origin: '*', 
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type'],
 }));
@@ -62,6 +62,7 @@ app.get('/login', async (req, res) => {
         if (result.rows.length === 0) {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
+
         res.status(200).json(result.rows[0]);
     } catch (err) {
         console.error('Error executing login query', err.stack);
