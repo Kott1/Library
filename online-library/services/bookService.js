@@ -6,10 +6,10 @@ import cors from 'cors';
 const { Pool } = pg;
 const app = express();
 app.use(express.json());
+
 app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type'],
+    origin: 'http://localhost:3000',
+    credentials: true,
 }));
 
 const pool = new Pool({
@@ -69,19 +69,51 @@ app.post('/books', async (req, res) => {
 });
 
 app.get('/books', async (req, res) => {
-    const listQuery = 'SELECT * FROM books ORDER BY created_at DESC;';
+    const { genre, year } = req.query;
+
+    let baseQuery = 'SELECT * FROM books';
+    const conditions = [];
+    const values = [];
+
+    if (genre) {
+        conditions.push(`genre = $${values.length + 1}`);
+        values.push(genre);
+    }
+
+    if (year) {
+        conditions.push(`publication_year = $${values.length + 1}`);
+        values.push(year);
+    }
+
+    if (conditions.length > 0) {
+        baseQuery += ' WHERE ' + conditions.join(' AND ');
+    }
+
+    baseQuery += ' ORDER BY created_at DESC';
 
     try {
-        const result = await pool.query(listQuery);
+        const result = await pool.query(baseQuery, values);
         res.json(result.rows);
     } catch (err) {
-        console.error('Error fetching books', err.stack);
+        console.error('Error fetching books with filters:', err.stack);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.get('/genres', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT DISTINCT genre FROM books ORDER BY genre ASC');
+        const genres = result.rows.map(row => row.genre);
+        res.json(genres);
+    } catch (err) {
+        console.error('Error fetching genres:', err.stack);
         res.status(500).json({ error: 'Database error' });
     }
 });
 
 app.get('/books/:id', async (req, res) => {
     const { id } = req.params;
+    console.log("for reading " + id)
     const query = 'SELECT * FROM books WHERE id = $1;';
     try {
         const result = await pool.query(query, [id]);

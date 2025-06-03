@@ -12,7 +12,30 @@ export default function AdminPanel() {
     const [mode, setMode] = useState('add');
 
     useEffect(() => {
-        if (!Boolean(localStorage.getItem('isLoggedIn')) || !Boolean(localStorage.getItem('isAdmin'))) router.push('/');
+        const checkAuth = async () => {
+            try {
+                const response = await fetch('http://localhost:3002/user', {
+                    method: 'GET',
+                    credentials: 'include',
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.isAdmin) {
+                        setIsAdmin(true);
+                    } else {
+                        router.push('/');
+                    }
+                } else {
+                    router.push('/');
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                router.push('/');
+            }
+        };
+
+        checkAuth();
     }, [router]);
 
     const handleMode = (newMode) => {
@@ -23,10 +46,17 @@ export default function AdminPanel() {
         router.push('/pages/home');
     };
 
-    const handleLogout = () => {
-        localStorage.removeItem('isAdmin');
-        localStorage.removeItem('isLoggedIn');
-        router.push('/');
+    const handleLogout = async () => {
+        try {
+            await fetch('http://localhost:3002/logout', {
+                method: 'POST',
+                credentials: 'include',
+            });
+        } catch (error) {
+            console.error('Logout failed:', error);
+        } finally {
+            router.push('/');
+        }
     };
 
     return (

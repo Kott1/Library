@@ -27,6 +27,7 @@ export default function EditBookForm() {
         try {
             const res = await fetch(`http://localhost:3002/books/${bookId}`, {
                 method: 'PUT',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                 title,

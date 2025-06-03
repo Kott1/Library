@@ -10,9 +10,11 @@ export default function Login () {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            console.log(1);
             const response = await fetch("http://localhost:3002/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
+                credentials: "include",
                 body: JSON.stringify({ 
                     email,
                     password
@@ -20,13 +22,9 @@ export default function Login () {
             });
 
             const data = await response.json();
+
             if (response.ok && !data.error) {
-                const isAdmin = email === 'admin@gmail.com' && password === 'admin';
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('isAdmin', JSON.stringify(isAdmin));
-
                 alert('User signed in successfully');
-
                 router.push('/pages/home');
             } else {
                 alert(data.error);

@@ -8,9 +8,8 @@ const app = express();
 app.use(express.json());
 
 app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type'],
+    origin: 'http://localhost:3000',
+    credentials: true,
 }));
 
 const pool = new Pool({
@@ -52,12 +51,14 @@ app.post('/register', async (req, res) => {
     }
 });
 
-app.get('/login', async (req, res) => {
+app.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
         const query = `SELECT * FROM users WHERE email = $1 AND password = $2;`;
         const result = await pool.query(query, [email, password]);
+
+        console.log(result);
 
         if (result.rows.length === 0) {
             return res.status(401).json({ error: 'Invalid email or password' });

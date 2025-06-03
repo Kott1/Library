@@ -14,6 +14,7 @@ export default function Register() {
             const response = await fetch('http://localhost:3002/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: "include",
                 body: JSON.stringify({
                 name,
                 email,
@@ -22,12 +23,7 @@ export default function Register() {
             });
             const data = await response.json();
             if (response.ok && !data.error) {
-                const isAdmin = email === 'admin@gmail.com' && password === 'admin';
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('isAdmin', JSON.stringify(isAdmin));
-
                 alert('User registered successfully!');
-
                 router.push('/pages/home');
             } else {
                 alert(data.error);

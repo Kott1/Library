@@ -2,58 +2,70 @@
 
 import { useEffect, useState } from 'react'
 import BookSearch from './bookSearch'
+import Link from 'next/link'
 
 export default function BookList() {
-    const [allBooks, setAllBooks] = useState([])
     const [displayed, setDisplayed] = useState([])
     const [genres, setGenres] = useState([])
     const [filterGenre, setFilterGenre] = useState('')
     const [filterYear, setFilterYear] = useState('')
 
     useEffect(() => {
-        async function fetchBooks() {
+        fetchBooks();
+        fetchGenres();
+    }, []);
+
+    const fetchBooks = async (genre = '', year = '') => {
         try {
-            const res = await fetch('http://localhost:3002/books')
+            const params = new URLSearchParams();
+            if (genre) params.append('genre', genre);
+            if (year) params.append('year', year);
+            const res = await fetch(`http://localhost:3002/books?${params}`, {
+                credentials: 'include'
+            });
 
             const data = await res.json();
             if (!res.ok && data.error) {
                 alert(data.error);
             }
 
-            setAllBooks(data)
-            setDisplayed(data)
-            const uniq = Array.from(new Set(data.map((b) => b.genre))).sort()
-            setGenres(uniq)
+            setDisplayed(data);
         } catch (err) {
             console.error('Error:', err);
             alert('Error listing book');
         }
+    };
+    
+    const fetchGenres = async () => {
+        try {
+            const res = await fetch(`http://localhost:3002/genres`, {
+                credentials: 'include'
+            })
+
+            const data = await res.json()
+            if (!res.ok && data.error) {
+                alert(data.error)
+            }
+
+            setGenres(data)
+        } catch (err) {
+            console.error('Error fetching genres:', err)
+            alert('Error loading genres')
         }
-        fetchBooks()
-    }, [])
+    };
 
     const applyFilters = () => {
-        let filtered = allBooks;
+        fetchBooks(filterGenre, filterYear);
+    };
 
-        if (filterGenre) {
-            filtered = filtered.filter((b) => b.genre === filterGenre);
-        }
-
-        if (filterYear) {
-            filtered = filtered.filter((b) => String(b.publication_year) === String(filterYear));
-        }
-
-        setDisplayed(filtered);
+    const resetFilters = () => {
+        setFilterGenre('');
+        setFilterYear('');
+        fetchBooks();
     };
 
     const handleSearch = (results) => {
         setDisplayed(results)
-    }
-
-    const resetFilters = () => {
-        setFilterGenre('')
-        setFilterYear('')
-        setDisplayed(allBooks)
     }
 
     return (
@@ -113,11 +125,11 @@ export default function BookList() {
                 <p><strong>Year:</strong> {b.publication_year}</p>
                 {b.description && <p>{b.description}</p>}
                 {b.file_url && (
-                    <p>
-                    <a href={b.file_url} target='_blank' rel='noopener noreferrer'>
-                        Read online
-                    </a>
-                    </p>
+                    <button>
+                    <Link href={`/pages/book?id=${b.id}`}>
+                    Read online
+                    </Link>
+                    </button>
                 )}
                 </li>
             ))}

@@ -9,7 +9,9 @@ export default function BookSearch({ onSearch }) {
         e.preventDefault()
 
         try {
-            const res = await fetch(`http://localhost:3002/books/${bookId}`)
+            const res = await fetch(`http://localhost:3002/books/${bookId}`, {
+                credentials: 'include'
+            });
 
             const data = await res.json()
             

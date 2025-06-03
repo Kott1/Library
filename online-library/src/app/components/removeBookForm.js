@@ -19,6 +19,7 @@ export default function RemoveBookForm() {
         try {
             const res = await fetch(`http://localhost:3002/books/${bookId}`, {
                 method: 'DELETE',
+                credentials: 'include'
             })
             
             const data = await res.json();

@@ -3,22 +3,42 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BookList from '../../components/bookList.js';
 
-export default function AdminPanel() {
+export default function HomePage() {
     const router = useRouter();
     const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
-        if (!Boolean(localStorage.getItem('isLoggedIn'))) {
-            router.push('/');
-        } else {
-            setIsAdmin(Boolean(localStorage.getItem('isAdmin')));
-        }
+        const checkAuth = async () => {
+            try {
+                const response = await fetch('http://localhost:3002/user', {
+                    method: 'GET',
+                    credentials: 'include',
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setIsAdmin(data.isAdmin);
+                } else {
+                    router.push('/');
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                router.push('/');
+            }
+        };
+
+        checkAuth();
     }, [router]);
 
-    const handleLogout = () => {
-        localStorage.removeItem('isAdmin');
-        localStorage.removeItem('isLoggedIn');
-        router.push('/');
+    const handleLogout = async () => {
+        try {
+            await fetch('http://localhost:3002/logout', {
+                method: 'POST',
+                credentials: 'include',
+            });
+            router.push('/');
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
     };
 
     return (
@@ -35,6 +55,7 @@ export default function AdminPanel() {
                 Go to admin panel
                 </button>
             )}
+            <button onClick={() => router.push('/pages/history')}>Reading history</button>
             <BookList />
             <button onClick={handleLogout} style={{ marginTop: '1rem' }}>
                 Logout
